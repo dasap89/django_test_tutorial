@@ -1,0 +1,23 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
+
+{% if user.is_authenticated %}
+        <p>Press <a href="{% url 'reg_app:logout' %}">LOGOUT</a> to leave this app</p>
+{% else %}
+        <p>You should <a href="{% url 'reg_app:login' %}">LOGIN</a> to start use this app</p>
+        <p>Or you can <a href="{% url 'reg_app:register' %}">create new account</a></p>
+ {% endif %}
+
+<p>Click <a href="{% url 'vote_app:answers' %}">here</a> to see answers</p>
+
+
+{% if latest_question_list %}
+    <ul>
+    {% for question in latest_question_list %}
+        <li><a href="{% url 'vote_app:detail' question.id %}">{{ question.question_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}

@@ -1,0 +1,20 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
+
+{% if not user.is_authenticated %}
+        <p>You should <a href="{% url 'reg_app:login' %}">LOGIN</a> to start use this app</p>
+        <p>Or you can <a href="{% url 'reg_app:register' %}">create new account</a></p>
+ {% endif %}
+
+{% if answer_per_user %}
+    <ul>
+    {% for answer in answer_per_user %}
+        <li>{{ answer.user }} {{ answer.question }} {{ answer.choice }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>This user did not vote.</p>
+{% endif %}
+
+<p><a href="{% url 'vote_app:index' %}">Back to main page.</a></p>
