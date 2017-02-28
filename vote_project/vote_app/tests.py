@@ -145,6 +145,9 @@ class CreateUserTests(TestCase):
 
 class AnswerTests(TestCase):
     def test_user_makes_answer(self):
+        """
+        The test is checks that logged user can vote.
+        """
         # create question
         question = create_question(question_text="Past question 1.", days=-5)
 
@@ -153,13 +156,8 @@ class AnswerTests(TestCase):
         create_choice(question, "Choice 2" )
 
         # create user and log in
-        response = self.client.get(reverse('reg_app:register'))
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(
-            reverse('reg_app:register'),
-            {'username': "admin", 'password1': "adminadmin", 'password2': "adminadmin"}
-        )
-        self.assertEqual(response.status_code, 302)
+        create_user("admin", "adminadmin")
+        login = self.client.force_login(User.objects.get_or_create(username='admin')[0])
 
         # get page with question
         response = self.client.get(reverse('vote_app:vote', args=(question.id,)))
@@ -176,6 +174,9 @@ class AnswerTests(TestCase):
         self.assertEqual(answer_count, 1)
 
     def test_user_makes_just_one_answer(self):
+        """
+        The test is checks that logged user can make only one answer.
+        """
         # create question
         question = create_question(question_text="Past question 1.", days=-5)
 
@@ -184,33 +185,34 @@ class AnswerTests(TestCase):
         create_choice(question, "Choice 2" )
 
         # create user and log in
-        response = self.client.get(reverse('reg_app:register'))
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(
-            reverse('reg_app:register'),
-            {'username': "admin", 'password1': "adminadmin", 'password2': "adminadmin"}
-        )
-        self.assertEqual(response.status_code, 302)
+        create_user("admin", "adminadmin")
+        login = self.client.force_login(User.objects.get_or_create(username='admin')[0])
 
         # get page with question
-        response = self.client.get(reverse('vote_app:vote', args=(question.id,)))
+        response = self.client.get(reverse('vote_app:vote', args=(question.id,)), follow=True)
         self.assertEqual(response.status_code, 200)
-        # vote
 
+        # vote
         response = self.client.post(
             reverse('vote_app:vote', args=(question.id,)),
-            {"choice": choice.id}
+            {"choice": choice.id},
         )
         self.assertEqual(response.status_code, 302)
 
+        # check amount of answers, it should be 1
+        answer_count = Answer.objects.filter(choice=choice).count()
+        self.assertEqual(answer_count, 1)
+
+        # vote again and it should return that you have already voted
         response = self.client.post(
             reverse('vote_app:vote', args=(question.id,)),
-            {"choice": choice.id}
+            {"choice": choice.id},
+            follow=True
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "already voted")
 
-        # check amount of answers, it should be 1
+        # check amount of answers, it still should be 1
         answer_count = Answer.objects.filter(choice=choice).count()
         self.assertEqual(answer_count, 1)
 
