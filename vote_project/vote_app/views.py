@@ -49,14 +49,18 @@ def vote(request, question_id):
             'error_message': "You didn't select a choice.",
         })
     else:
-        selected_choice.votes += 1
-        selected_choice.save()
-
         user = get_object_or_404(User, username=request.user)
-        answer = Answer(user = user, question = question, choice = selected_choice)
-        answer.save()
-
-        return HttpResponseRedirect(reverse('vote_app:results', args=(question.id,)))
+        if Answer.objects.filter(user=user, question=question).count() == 0:
+            selected_choice.votes += 1
+            selected_choice.save()
+            answer = Answer(user = user, question = question, choice = selected_choice)
+            answer.save()
+            return HttpResponseRedirect(reverse('vote_app:results', args=(question.id,)))
+        else:
+            return render(request, 'polls/detail.html', {
+                'question': question,
+                'error_message': "You have already voted. So your current answer will not taken into account.",
+            })
 
 
 class AnswerUserView(generic.ListView):

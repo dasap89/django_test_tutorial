@@ -3,7 +3,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}" />
 
 {% if user.is_authenticated %}
-        <p>Press <a href="{% url 'reg_app:logout' %}">LOGOUT</a> to leave this app</p>
+        <p>You are logged as {{ user.username }}. Press <a href="{% url 'reg_app:logout' %}">LOGOUT</a> to leave this app</p>
 {% else %}
         <p>You should <a href="{% url 'reg_app:login' %}">LOGIN</a> to start use this app</p>
         <p>Or you can <a href="{% url 'reg_app:register' %}">create new account</a></p>
